@@ -14,7 +14,7 @@ console.log('Server running on http://%s:%s', ip, port);
 
 // Routing
 app.get('/', function (req, res) {
-  res.send('Hello!')
+  res.send('Hello ' + req.headers['user-agent']);
 })
 
 // Chatroom
