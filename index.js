@@ -14,20 +14,20 @@ console.log('Bus Tracker Server is running since ' + getDateTime()+ 'http://%s:%
 
 // Routing
 app.get('/', function (req, res) {
-	res.send('Hello ' + req.headers['user-agent']);
+	res.send('Welcome ' + req.headers['user-agent']);
 })
 
-/*================ FANCTIONS START ===========================*/
+/*================ FUNCTIONS START ===========================*/
+
 function removeClient(ws) {
 	//remove from client list
 	for (i = 0; i < ListOfClients.length; i++) {
 		if (ListOfClients[i].socket === ws) {
-			var u = ListOfClients[i].username;
 			ListOfClients.splice(i, 1);
 
-			var m = "client is disconnected: " + u;
+			var m = ListOfClients[i].username + " is disconnected.";
 
-			log(m);
+			console.log(m);
 		}
 	}
 	
@@ -125,110 +125,88 @@ var isEqual = function (value, other) {
 
 };
 
+/*================ FUNCTIONS END =============================*/
+
 var numUsers = 0;
-var usernames = [];
 var ListOfClients = [];
 var bus_id_list = [];
 
 io.on('connection', function (socket) {
-	console.log("User joined: " + socket.id);
-
-	// when the client emits 'new message', this listens and executes
-	socket.on('message', function (data) {
-		var o = JSON.parse(data);
-		var action = o.action;
-		var message = o.message;
-		var username = o.username;
-
-		console.log("message: " + message + ". from: " + username + ". action: " + action);
-		
-		switch (action) {
-			case "get bus list":
-				//make string list ( + "$" + bus_id_list[i].lat + "$" + bus_id_list[i].lng)
-				var strList = "@"; 
-				for (i = 0; i < bus_id_list.length; i++) {
-					strList += bus_id_list[i].id + "|";
-				}
-				
-				if (strList === '@') {
-					ws.send('No busses available for tracking.');
-				} else {
-					ws.send(strList);
-				}
-				
-				log("Bus ID list sent to " + username + ". List: " + strList);
-				break;
-			
-			case "set bus id":
-				bus_id = json.id;
-				
-				var client = {
-					id: json.id,
-					lat: json.lat,
-					lng: json.lng,
-					username: username
-				};
-
-				//ID is unique for each bus
-				var can_add = true;
-				for (i = 0; i < bus_id_list.length; i++) {
-					if (bus_id_list[i].id === json.id) {
-						can_add = false;
-						break;
-					}
-				}
-				if (can_add) {
-					bus_id_list.push(client);
-					
-					//keep the initial socket connection in client list 
-					for (i = 0; i < ListOfClients.length; i++) {
-						if (ListOfClients[i].socket === ws) {
-							ListOfClients[i].is_bus = true;
-
-							var m = "Bus (" + json.id + ") is ready for tracking.";
-
-							log(m);
-						}
-					}
-					
-					var m = "Bus tracking enabled successfully. Bus ID: " + json.id;
-				
-					log(json.message);
-					
-					// Send to current client
-					ws.send(m);
-				} else {
-					var m = "The bus ID "+ json.id + " is already enabled for tracking. Choose a different and unique ID to enable tracking.";
-				
-					// Send to current client
-					ws.send(m);
-				}
-				
-				break;
-				
-			case "get bus location":
-				for (i = 0; i < ListOfClients.length; i++) {
-					if (ListOfClients[i].socket === ws) {
-						ListOfClients[i].track_bus = json.bus_id;
-
-						log(json.message);
-
-						ws.send('Bus ID added successfully for tracking.');
-					}
-				}
-				break;
-			
-			case "broadcast location":
-				//update all clients with bus location
-				for (i = 0; i < ListOfClients.length; i++) {
-					if (ListOfClients[i].track_bus === json.id) {
-						ListOfClients[i].socket.send("$" + "|" + json.id + "|" + json.lat + "|" + json.lng);
-					}
-				}
+	
+	socket.on('set bus id', function (id_bus) {
+		//ID is unique for each bus
+		var can_add = true;
+		for (i = 0; i < bus_id_list.length; i++) {
+			if (bus_id_list[i].id === id_bus) {
+				can_add = false;
 				break;
 			}
-		});
+		}
+		
+		if (can_add) {
+			bus_id_list.push(id_bus);
+			//keep the initial socket object in client list 
+			for (i = 0; i < ListOfClients.length; i++) {
+				if (ListOfClients[i].socket === socket) {
+					ListOfClients[i].is_bus = true;
 
+					var m = "Bus (" + json.id + ") is ready for tracking.";
+
+					console.log(m);
+				}
+			}
+			
+			var m = "Bus tracking enabled successfully. Bus ID: " + json.id;
+		} else {
+			var m = "The bus ID "+ json.id + " is already on the system. Choose a different and unique ID to enable tracking.";
+		}
+		
+		socket.emit('message', m);
+	});
+	
+	socket.on('broadcast location', function (loc) {
+		var json = JSON.parse(loc);
+		//update all clients with bus location
+		for (i = 0; i < ListOfClients.length; i++) {
+			if (ListOfClients[i].track_bus === json.id) {
+				ListOfClients[i].socket.emit('set bus location', {	
+						id: json.id,
+						latitude: json.lat,
+						longitude: json.lng
+					});
+			}
+		}
+		socket.emit('bus location updated', "");
+	});
+	
+	socket.on('request bus location', function (id_bus) {
+		for (i = 0; i < ListOfClients.length; i++) {
+			if (ListOfClients[i].socket === socket) {
+				ListOfClients[i].track_bus = id_bus;
+
+				socket.emit('message', 'Bus ID ' + id_bus + ' is being tracked successfully.');
+			}
+		}
+	});
+	
+	socket.on('get bus list', function (message) {
+		var busses = [];
+
+		//populate the list and emit back when done
+		for (i = 0; i < bus_id_list.length; i++) {
+			if (bus_id_list[i].id) {
+				busses.push(bus_id_list[i].id);
+			}
+		}
+		
+		if (typeof array != "undefined" && array != null 
+				&& array.length != null && array.length > 0) {
+			socket.emit('set bus list', busses);
+		} else {
+			socket.emit('message', 'There is currently no busses available for tracking.');
+		}
+	});
+	
 	socket.on('add user', function (username) {
 		//we have to make sure the this list always contains only one reference to the user
 		var client = {	
@@ -239,24 +217,17 @@ io.on('connection', function (socket) {
 		};
 		ListOfClients.push(client);
 		
-		
 		var m = "Welcome to Bus Tracker " + username + ". Tap on Find A Bus to request a list of all available busses. If the request is successfull tap on a bus to request its location.";
 	
 		// Send to current client
-		socket.emit('user added', {
-			message: m
-		});
+		socket.emit('message', m);
 	});
 
 	socket.on('disconnect', function () {
 		if (addedUser) {
 			--numUsers;
 
-			// echo globally that this client has left
-			socket.broadcast.emit('user left', {
-				username: socket.username,
-				numUsers: numUsers
-			});
+			removeClient(socket);
 		}
 	});
 });
