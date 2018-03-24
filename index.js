@@ -169,11 +169,7 @@ io.on('connection', function (socket) {
 		//update all clients with bus location
 		for (i = 0; i < ListOfClients.length; i++) {
 			if (ListOfClients[i].track_bus === json.id) {
-				ListOfClients[i].socket.emit('set bus location', {	
-						id: json.id,
-						latitude: json.lat,
-						longitude: json.lng
-					});
+				ListOfClients[i].socket.emit('set bus location', json.id + '|' + json.lat + '|' + json.lng);
 			}
 		}
 		socket.emit('bus location updated', "");
@@ -193,9 +189,10 @@ io.on('connection', function (socket) {
 		var busses = [];
 
 		//populate the list and emit back when done
+		var response = '';
 		for (i = 0; i < bus_id_list.length; i++) {
 			if (bus_id_list[i].id) {
-				busses.push(bus_id_list[i].id);
+				response += bus_id_list[i].id + '|';
 			}
 		}
 		
@@ -221,6 +218,8 @@ io.on('connection', function (socket) {
 	
 		// Send to current client
 		socket.emit('message', m);
+		
+		console.log('The following message was sent to one client. ' + m);
 	});
 
 	socket.on('disconnect', function () {
