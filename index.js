@@ -133,32 +133,32 @@ var bus_id_list = [];
 
 io.on('connection', function (socket) {
 	
-	socket.on('set bus id', function (id_bus) {
+	socket.on('set bus id', function (bus_id) {
 		//ID is unique for each bus
 		var can_add = true;
 		for (i = 0; i < bus_id_list.length; i++) {
-			if (bus_id_list[i].id === id_bus) {
+			if (bus_id_list[i].id === bus_id) {
 				can_add = false;
 				break;
 			}
 		}
 		
 		if (can_add) {
-			bus_id_list.push(id_bus);
+			bus_id_list.push(bus_id);
 			//keep the initial socket object in client list 
 			for (i = 0; i < ListOfClients.length; i++) {
 				if (ListOfClients[i].socket === socket) {
 					ListOfClients[i].is_bus = true;
 
-					var m = "Bus (" + json.id + ") is ready for tracking.";
+					var m = "Bus (" + bus_id + ") is ready for tracking.";
 
 					console.log(m);
 				}
 			}
 			
-			var m = "Bus tracking enabled successfully. Bus ID: " + json.id;
+			var m = "Bus tracking enabled successfully. Bus ID: " + bus_id;
 		} else {
-			var m = "The bus ID "+ json.id + " is already on the system. Choose a different and unique ID to enable tracking.";
+			var m = "The bus ID "+ bus_id + " is already on the system. Choose a different and unique ID to enable tracking.";
 		}
 		
 		socket.emit('message', m);
@@ -175,12 +175,12 @@ io.on('connection', function (socket) {
 		socket.emit('bus location updated', "");
 	});
 	
-	socket.on('request bus location', function (id_bus) {
+	socket.on('request bus location', function (bus_id) {
 		for (i = 0; i < ListOfClients.length; i++) {
 			if (ListOfClients[i].socket === socket) {
-				ListOfClients[i].track_bus = id_bus;
+				ListOfClients[i].track_bus = bus_id;
 
-				socket.emit('message', 'Bus ID ' + id_bus + ' is being tracked successfully.');
+				socket.emit('message', 'Bus ID ' + bus_id + ' is being tracked successfully.');
 			}
 		}
 	});
