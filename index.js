@@ -133,6 +133,8 @@ var bus_id_list = [];
 
 io.on('connection', function (socket) {
 	
+	console.log(numUsers + ' connected to BTS.');
+	
 	socket.on('set bus id', function (bus_id) {
 		//ID is unique for each bus
 		var can_add = true;
@@ -214,6 +216,8 @@ io.on('connection', function (socket) {
 		};
 		ListOfClients.push(client);
 		
+		++numUsers;
+		
 		var m = "Welcome to Bus Tracker " + username + ". Tap on Find A Bus to request a list of all available busses. If the request is successfull tap on a bus to request its location.";
 	
 		// Send to current client
@@ -221,10 +225,8 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('disconnect', function () {
-		if (addedUser) {
-			--numUsers;
+		--numUsers;
 
-			removeClient(socket);
-		}
+		removeClient(socket);
 	});
 });
