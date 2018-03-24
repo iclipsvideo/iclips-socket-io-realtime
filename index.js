@@ -150,7 +150,7 @@ io.on('connection', function (socket) {
 				if (ListOfClients[i].socket === socket) {
 					ListOfClients[i].is_bus = true;
 
-					var m = "Bus (" + json.id + ") is ready for tracking.";
+					var m = "Bus (" + id_bus + ") is ready for tracking.";
 
 					console.log(m);
 				}
@@ -158,7 +158,7 @@ io.on('connection', function (socket) {
 			
 			var m = "Bus tracking enabled successfully. Bus ID: " + json.id;
 		} else {
-			var m = "The bus ID "+ json.id + " is already on the system. Choose a different and unique ID to enable tracking.";
+			var m = "The bus ID "+ id_bus + " is already on the system. Choose a different and unique ID to enable tracking.";
 		}
 		
 		socket.emit('message', m);
