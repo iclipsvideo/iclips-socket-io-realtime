@@ -212,7 +212,7 @@ io.on('connection', function (socket) {
 		}
 		console.log('<get bus list> event was called. response: ' + response);
 		if (response !== '') {
-			socket.emit('set bus list', busses);
+			socket.emit('set bus list', response);
 		} else {
 			socket.emit('message', 'There is currently no busses available for tracking.');
 		}
