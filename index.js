@@ -10,11 +10,11 @@ var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
 
 
 server.listen(port, ip);
-console.log('Bus Tracker Server is running since ' + getDateTime()+ 'http://%s:%s', ip, port);
+console.log('Bus Tracker Server is running since ' + getDateTime() + 'on http://%s:%s', ip, port);
 
 // Routing
 app.get('/', function (req, res) {
-	res.send('Welcome ' + req.headers['user-agent']);
+	res.send('Welcome, ' + req.headers['user-agent']);
 })
 
 /*================ FUNCTIONS START =============-==============*/
