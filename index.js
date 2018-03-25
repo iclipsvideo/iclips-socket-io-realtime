@@ -133,7 +133,7 @@ var bus_id_list = [];
 
 io.on('connection', function (socket) {
 	
-	console.log(numUsers + ' connected to BTS.');
+	console.log(socket.id + ' connected to BTS.');
 	
 	socket.on('set bus id', function (bus_id) {
 		//ID is unique for each bus
@@ -152,16 +152,16 @@ io.on('connection', function (socket) {
 				if (ListOfClients[i].socket === socket) {
 					ListOfClients[i].is_bus = true;
 
-					var m = "Bus (" + bus_id + ") is ready for tracking.";
+					var m = "Bus (" + bus_id + ") is enabled successfully and ready for tracking.";
 
 					console.log(m);
 				}
-			}
-			
-			var m = "Bus tracking enabled successfully. Bus ID: " + bus_id;
+			}			
 		} else {
 			var m = "The bus ID "+ bus_id + " is already on the system. Choose a different and unique ID to enable tracking.";
 		}
+		
+		console.log(m);
 		
 		socket.emit('message', m);
 	});
@@ -216,8 +216,6 @@ io.on('connection', function (socket) {
 		};
 		ListOfClients.push(client);
 		
-		++numUsers;
-		
 		var m = "Welcome to Bus Tracker " + username + ". Tap on Find A Bus to request a list of all available busses. If the request is successfull tap on a bus to request its location.";
 	
 		// Send to current client
@@ -225,8 +223,6 @@ io.on('connection', function (socket) {
 	});
 
 	socket.on('disconnect', function () {
-		--numUsers;
-
 		removeClient(socket);
 	});
 });
