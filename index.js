@@ -153,8 +153,6 @@ io.on('connection', function (socket) {
 					ListOfClients[i].is_bus = true;
 
 					var m = "Bus (" + bus_id + ") is enabled successfully and ready for tracking.";
-
-					console.log(m);
 				}
 			}			
 		} else {
@@ -188,8 +186,6 @@ io.on('connection', function (socket) {
 	});
 	
 	socket.on('get bus list', function (message) {
-		var busses = [];
-
 		//populate the list and emit back when done
 		var response = '';
 		for (i = 0; i < bus_id_list.length; i++) {
@@ -198,8 +194,7 @@ io.on('connection', function (socket) {
 			}
 		}
 		
-		if (typeof array != "undefined" && array != null 
-				&& array.length != null && array.length > 0) {
+		if (response !== '') {
 			socket.emit('set bus list', busses);
 		} else {
 			socket.emit('message', 'There is currently no busses available for tracking.');
