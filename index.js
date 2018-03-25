@@ -163,7 +163,7 @@ io.on('connection', function (socket) {
 		
 		console.log(m);
 		
-		socket.emit('message', m);
+		socket.emit('bus id enabled', m);
 	});
 	
 	socket.on('broadcast location', function (loc) {
