@@ -10,7 +10,7 @@ var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
 
 
 server.listen(port, ip);
-console.log('Bus Tracker Server is running since ' + getDateTime() + 'on http://%s:%s', ip, port);
+console.log('Bus Tracker Server is running since ' + getDateTime() + ' on http://%s:%s', ip, port);
 
 // Routing
 app.get('/', function (req, res) {
@@ -210,7 +210,7 @@ io.on('connection', function (socket) {
 		for (i = 0; i < bus_id_list.length; i++) {
 			response += bus_id_list[i] + '|';
 		}
-		
+		console.log('<get bus list> event was called. response: ' + response);
 		if (response !== '') {
 			socket.emit('set bus list', busses);
 		} else {
