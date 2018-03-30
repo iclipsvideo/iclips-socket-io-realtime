@@ -113,7 +113,7 @@ function removeClient(ws) {
 		if (ListOfClients[i].socket === ws) {
 			username = ListOfClients[i].username;
 			bus_id = ListOfClients[i].bus_id;
-			var m = username + " is disconnected.";
+			var m = username + ' disconnected at ' + getDateTime();
 			
 			ListOfClients.splice(i, 1);
 
@@ -148,10 +148,13 @@ io.on('connection', function (socket) {
 		};
 		ListOfClients.push(client);
 		
-		var m = "Welcome to Bus Tracker " + username + ". Tap on Find A Bus to request a list of all available busses. If the request is successfull tap on a bus to request its location.";
+		var m = "Welcome to Go George Bus Tracker " + username + ". Find and track a bus location in real-time.";
 	
 		// Send to current client
-		socket.emit('message', m);
+		socket.emit('user added', m);
+		
+		//log username to console
+		console.log(username + ' connected at ' + getDateTime());
 	});
 	
 	socket.on('set bus id', function (bus_id) {
@@ -189,9 +192,11 @@ io.on('connection', function (socket) {
 		for (i = 0; i < ListOfClients.length; i++) {
 			if (ListOfClients[i].track_bus === json.id) {
 				ListOfClients[i].socket.emit('set bus location', json.id + '|' + json.lat + '|' + json.lng);
+				console.log('Broadcasting location of ' + json.id + ' to ' + ListOfClients[i].username);
 			}
 		}
 		socket.emit('bus location updated', "");
+		
 	});
 	
 	socket.on('request bus location', function (bus_id) {
