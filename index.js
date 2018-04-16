@@ -8,7 +8,6 @@ var io = require('socket.io')(server);
 var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0';
 
-
 server.listen(port, ip);
 console.log('Bus Tracker Server is running since ' + getDateTime() + ' on http://%s:%s', ip, port);
 
