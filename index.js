@@ -39,7 +39,6 @@ function getDateTime() {
     day = (day < 10 ? "0" : "") + day;
 
     return year + ":" + month + ":" + day + " " + hour + ":" + min + ":" + sec;
-
 }
 
 var isEqual = function (value, other) {
